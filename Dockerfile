@@ -2,7 +2,7 @@ FROM python:3.8
 
 # set a directory for the app
 
-WORKDIR /home/roman/tg_sup_bot
+WORKDIR /Desktop/project_working/tg_sup_bot
 
 # copy all the files to the container
 COPY . .
@@ -17,4 +17,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 EXPOSE 5000
 
 # run the command
-CMD ["python", "./main.py"]
+CMD ["python", "videoblog/main.py"]
+
+RUN alembic upgrade head

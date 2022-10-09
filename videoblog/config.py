@@ -1,5 +1,5 @@
 bot_token = '5387826344:AAFlnbgcXBDjDn2QrkE1cBvNy55SeOQTkMs'
-ip = 'localhost'
+ip = '0.0.0.0'
 PG_USER = 'postgres'
 PG_PASSWORD = 'roma'
 DATABASE = 'supp'
