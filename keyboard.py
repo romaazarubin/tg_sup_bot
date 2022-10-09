@@ -9,7 +9,7 @@ menu_application = InlineKeyboardMarkup(
     )
 
 
-button_sity = InlineKeyboardMarkup(
+button_city = InlineKeyboardMarkup(
     inline_keyboard=[
         [
             InlineKeyboardButton(text='Москва', callback_data='Moskva')
@@ -80,7 +80,7 @@ back_main_keyboard = InlineKeyboardMarkup(
     ]
 )
 
-list_sity = InlineKeyboardMarkup(
+list_city = InlineKeyboardMarkup(
     inline_keyboard=[
         [
             InlineKeyboardButton(text='Москва', callback_data='msk')

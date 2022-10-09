@@ -1,2 +1,4 @@
-aiogram==2.22.1
-psycopg2==2.9.3
+aiogram~=2.22.2
+psycopg2-binary==2.9.4
+alembic==1.1.0
+SQLAlchemy~=1.4.41

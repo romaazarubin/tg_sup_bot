@@ -4,7 +4,8 @@ from main import dp, bot
 from config import DATABASE,PG_USER,PG_PASSWORD, ip, \
     admin_id, id_group
 import psycopg2
-from keyboard import button_sity, menu_application_spb,menu_application_irkt,\
+
+from keyboard import button_city, menu_application_spb,menu_application_irkt,\
     menu_application_msk, menu_admin, back_main_keyboard
 
 
@@ -32,17 +33,17 @@ async def back(call: CallbackQuery):
 
 @dp.callback_query_handler(Text(equals=['statistics_moscow', 'statistics_spb', 'statistics_irkutsk']))
 async def stats_sity(call: CallbackQuery):
-    sity =''
+    city =''
     if call.data == 'statistics_moscow':
-        sity = 'Москва'
+        city = 'Москва'
     elif call.data == 'statistics_spb':
-        sity = 'Санкт-Петербург'
+        city = 'Санкт-Петербург'
     elif call.data == 'statistics_irkutsk':
-        sity = 'Иркутск'
-    cursor.execute(f"SELECT count(*) FROM support_stats WHERE sity='{sity}'")
+        city = 'Иркутск'
+    cursor.execute(f"SELECT count(*) FROM support_stats WHERE сity='{city}'")
     db_connection.commit()
     count = cursor.fetchone()[0]
-    await call.message.answer(text=f'всего заявок по городу {sity}: {count}', reply_markup=back_main_keyboard)
+    await call.message.answer(text=f'всего заявок по городу {city}: {count}', reply_markup=back_main_keyboard)
     await call.message.delete()
 
 @dp.callback_query_handler(text_contains='delete_application')
@@ -79,7 +80,7 @@ async def stats(call: CallbackQuery):
 async def start(message: Message):
     if message.chat.id != -763455375:  # and message.from_user.id not in support_id:
         await bot.send_message(chat_id=message.from_user.id, text='Выберите город для обращение к менеджеру', \
-                               reply_markup=button_sity)
+                               reply_markup=button_city)
 
 
 
@@ -89,14 +90,14 @@ async def help(call: CallbackQuery):
     await call.message.delete()
     message_id = call.message.message_id
     user_id = call.from_user.id
-    sity = str(call.data)
+    city = str(call.data)
     cursor.execute(f"SELECT CASE WHEN EXISTS(SELECT user_id FROM us_id WHERE user_id = '{user_id}') THEN 1 ELSE 2 END;")
     row = (cursor.fetchone())[0]
     if row == 2:
-        cursor.execute(f"INSERT INTO us_id(user_id,sity,message_id) VALUES ('{user_id}', '{sity}', '{message_id}');")
+        cursor.execute(f"INSERT INTO us_id(user_id,city,message_id) VALUES ('{user_id}', '{city}', '{message_id}');")
         db_connection.commit()
         if call.data == 'Moskva':
-            await bot.send_message(chat_id=id_group, text=message_id, reply_markup=menu_application_msk)
+            await bot.send_message(chat_id=id_group, text='Запрос из Москвы', reply_markup=menu_application_msk)
         elif call.data == 'Irkutsk':
             await bot.send_message(chat_id=id_group, text='Запрос из Иркутска', reply_markup=menu_application_irkt)
         elif call.data == 'spb':
@@ -121,26 +122,27 @@ async def ans(call: CallbackQuery):
     elif call.data == 'support_irkutsk':
         support_name_irkutsk = st('Иркутск')
     if call.data =='support_moskva' and call.from_user.username.lower() in support_name_moscow:
-        cursor.execute(f"SELECT user_id FROM us_id WHERE sity='Moskva' LIMIT 1")
+        cursor.execute(f"SELECT user_id FROM us_id WHERE city='Moskva' LIMIT 1")
         db_connection.commit()
         z = cursor.fetchall()
 
         for i in z:
             id = i[0]
         support_name = call.from_user.username
-        sity = 'Москва'
+        city = 'Москва'
         try:
-            cursor.execute(f"INSERT INTO support_stats(support_name,user_name, sity) VALUES ('{support_name}', '{id}', '{sity}');")
+            cursor.execute(f"INSERT INTO support_stats(support_name,user_name, city) VALUES ('{support_name}', '{id}', '{city}');")
             cursor.execute(f"DELETE FROM us_id WHERE user_id ='{id}'")
             db_connection.commit()
             await call.message.delete()
             await call.answer(text='Заявка принята')
-            await bot.send_message(chat_id=id, text=message_id)
+            await bot.send_message(chat_id=id, text=f"Ссылка на менеджера: \n"
+                                                    f"{'https://t.me/' + support_name}")
         except:
             await call.answer('Заявку уже приняли')
 
     elif call.data == 'support_spb' and call.from_user.username.lower() in support_name_spb:
-        cursor.execute(f"SELECT user_id FROM us_id WHERE sity='spb' LIMIT 1")
+        cursor.execute(f"SELECT user_id FROM us_id WHERE city='spb' LIMIT 1")
         db_connection.commit()
         z = cursor.fetchall()
 
@@ -149,9 +151,9 @@ async def ans(call: CallbackQuery):
 
 
         support_name = call.from_user.username
-        sity = 'Санкт-Петербург'
+        city = 'Санкт-Петербург'
         try:
-            cursor.execute(f"INSERT INTO support_stats(support_name,user_name, sity) VALUES ('{support_name}', '{id}', '{sity}');")
+            cursor.execute(f"INSERT INTO support_stats(support_name,user_name, city) VALUES ('{support_name}', '{id}', '{city}');")
             cursor.execute(f"DELETE FROM us_id WHERE user_id ='{id}'")
             db_connection.commit()
             await call.message.delete()
@@ -163,7 +165,7 @@ async def ans(call: CallbackQuery):
 
 
     elif call.data =='support_irkutsk' and call.from_user.username.lower() in support_name_irkutsk:
-        cursor.execute(f"SELECT user_id FROM us_id WHERE sity='Irkutsk' LIMIT 1")
+        cursor.execute(f"SELECT user_id FROM us_id WHERE city='Irkutsk' LIMIT 1")
         db_connection.commit()
         z = cursor.fetchall()
 
@@ -172,9 +174,9 @@ async def ans(call: CallbackQuery):
 
 
         support_name = call.from_user.username
-        sity = 'Иркутск'
+        city = 'Иркутск'
         try:
-            cursor.execute(f"INSERT INTO support_stats(support_name,user_name, sity) VALUES ('{support_name}', '{id}', '{sity}');")
+            cursor.execute(f"INSERT INTO support_stats(support_name,user_name, city) VALUES ('{support_name}', '{id}', '{city}');")
             cursor.execute(f"DELETE FROM us_id WHERE user_id ='{id}'")
             db_connection.commit()
             await call.message.delete()
@@ -193,7 +195,7 @@ async def word(message: Message):
         msg = message.text.split()
         if msg[0].lower() == 'добавить':
             try:
-                cursor.execute(f"INSERT INTO support_list(sup_name,sup_sity) VALUES ('{msg[1]}','{msg[2]}');")
+                cursor.execute(f"INSERT INTO support_list(sup_name,sup_city) VALUES ('{msg[1]}','{msg[2]}');")
                 db_connection.commit()
                 step = 'Менеджер успешно добавлен'
             except:
@@ -201,7 +203,7 @@ async def word(message: Message):
 
         elif msg[0].lower() == 'удалить':
             try:
-                cursor.execute(f"DELETE FROM support_list WHERE sup_name= '{msg[1]}' and sup_sity = '{msg[2]}'")
+                cursor.execute(f"DELETE FROM support_list WHERE sup_name= '{msg[1]}' and sup_city = '{msg[2]}'")
                 db_connection.commit()
                 step = 'Менеджер успешно удален'
             except:
@@ -218,12 +220,12 @@ async def word(message: Message):
             step = 'НЕВЕРНЫЙ ЗАПРОС'
         await bot.send_message(chat_id=message.from_user.id, text=step)
 
-def st(sity):
+def st(city):
     sup_list = []
-    cursor.execute(f"SELECT count(*) FROM support_list WHERE sup_sity ='{sity}'")
+    cursor.execute(f"SELECT count(*) FROM support_list WHERE sup_city ='{city}'")
     db_connection.commit()
     count = int(cursor.fetchone()[0])
-    cursor.execute(f"SELECT sup_name FROM support_list WHERE sup_sity='{sity}'")
+    cursor.execute(f"SELECT sup_name FROM support_list WHERE sup_city='{city}'")
     db_connection.commit()
     for i in range(count):
         name = cursor.fetchone()[0].lower()
